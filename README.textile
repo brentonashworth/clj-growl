@@ -17,7 +17,7 @@ Add the following dependency:
 <dependency>
   <groupId>clj-growl</groupId>
   <artifactId>clj-growl</artifactId>
-  <version>0.1.0</version>
+  <version>0.1.1</version>
 </dependency>
 </code>
 </pre>
@@ -36,6 +36,10 @@ which comes from Clojars...
 h2. Usage
 
 Install Growl. Open the Growl control panel and select the network tab. Select "Listen for incoming notifications" and "Allow remote application registration". You may enter a Server Password or leave it empty.
+
+For the example below, my settings look like this:
+
+<img src="http://s3.amazonaws.com/formpluslogic-public/images/clj-growl/growl_settings.png" alt="Growl Settings"/>
 
 Version 0.1.1 of this library has been tested against Growl 1.2.1.
 
@@ -61,7 +65,7 @@ If you entered a Server Password then that password in the first argument to bot
 
 h3. growlnotify
 
-If you have the <code>growlnotify</code> command installed they you may also send notifications using the <code>growlnotify</code> function.
+If you have the <code>growlnotify</code> command installed then you may also send notifications using the <code>growlnotify</code> function.
 
 <pre>
 <code>
@@ -75,6 +79,12 @@ If you have the <code>growlnotify</code> command installed they you may also sen
 Even though this looks easier to use, I have found that it is not reliable. If your program is sending many notifications, they will not be consistently displayed.
 
 h2. Notes
+
+Since the UDP protocol is used, there are no error messages.
+
+If you have the Growl settings window open and are looking at the list of applications, when you send the registration packet, the application will not appear in the list. You have to close the settings window and then re-open it to see your application.
+
+If you have configured a password, you have to use the same password for sending the registration message and the notifications.
 
 The current implementation does not support flags. Flags allow you to set the priority of the notification as well as its stickyness.
 
