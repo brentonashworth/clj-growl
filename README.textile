@@ -37,6 +37,8 @@ h2. Usage
 
 Install Growl. Open the Growl control panel and select the network tab. Select "Listen for incoming notifications" and "Allow remote application registration". You may enter a Server Password or leave it empty.
 
+Version 0.1.0 of this library has been testing against Growl 1.2.1.
+
 <pre>
 <code>
 (use 'clj-growl.core)
