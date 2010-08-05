@@ -6,7 +6,7 @@ h2. Installation
 
 h3. Leiningen
 
-Add <code>[clj-growl "0.1.0"]</code> to your :dependencies in project.clj.
+Add <code>[clj-growl "0.1.1"]</code> to your :dependencies in project.clj.
 
 h3. Maven
 
@@ -37,7 +37,7 @@ h2. Usage
 
 Install Growl. Open the Growl control panel and select the network tab. Select "Listen for incoming notifications" and "Allow remote application registration". You may enter a Server Password or leave it empty.
 
-Version 0.1.0 of this library has been tested against Growl 1.2.1.
+Version 0.1.1 of this library has been tested against Growl 1.2.1.
 
 <pre>
 <code>
