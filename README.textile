@@ -1,0 +1,86 @@
+h1. clj-growl
+
+Send "Growl":http://growl.info/ notifications from Clojure. Implements the GrowlTalk UDP protocol which is somewhat clearly described "here":http://growl.info/documentation/developer/protocol.php. I also used a "php implementation":http://the.taoofmac.com/space/projects/netgrowl.php as a reference. 
+
+h2. Installation
+
+h3. Leiningen
+
+Add <code>[clj-growl "0.1.0"]</code> to your :dependencies in project.clj.
+
+h3. Maven
+
+Add the following dependency:
+
+<pre>
+<code>
+<dependency>
+  <groupId>clj-growl</groupId>
+  <artifactId>clj-growl</artifactId>
+  <version>0.1.0</version>
+</dependency>
+</code>
+</pre>
+
+which comes from Clojars...
+
+<pre>
+<code>
+<repository>
+  <id>clojars.org</id>
+  <url>http://clojars.org/repo</url>
+</repository>
+</code>
+</pre>
+
+h2. Usage
+
+Install Growl. Open the Growl control panel and select the network tab. Select "Listen for incoming notifications" and "Allow remote application registration". You may enter a Server Password or leave it empty.
+
+<pre>
+<code>
+(use 'clj-growl.core)
+
+(def registration (registration-packet "MyApp" ["Success" true "Failure" true]))
+(send-datagram registration)
+
+(def notification (notification-packet "MyApp" "Success" "Title" "Message"))
+(send-datagram notification)
+</code>
+</pre>
+
+You must send a registration packet before you can send notifications. You may then only send notifications to a registered application and notification. 
+
+Once you have sent the registration packet, you may open the Growl control panel and customize the appearance and behavior of each type of notification.
+
+When creating a registration packet, you pass a list of notifications. This list contains notification names followed by a boolean which indicates if the previous notification is enabled by default.
+
+If you entered a Server Password then that password in the first argument to both <code>registration-packet</code> and <code>notification-packet</code>.
+
+h3. growlnotify
+
+If you have the <code>growlnotify</code> command installed they you may also send notifications using the <code>growlnotify</code> function.
+
+<pre>
+<code>
+(use 'clj-growl.core)
+
+(growlnotify "MyApp" "Title" "Message")
+(growlnotify "MyApp" {:type :sticky :image "some/image.png"} "Title" "Message")
+</code>
+</pre>
+
+Even though this looks easier to use, I have found that it is not reliable. If your program is sending many notifications, they will not be consistently displayed.
+
+h2. Notes
+
+The current implementation does not support flags. Flags allow you to set the priority of the notification as well as its stickyness.
+
+I don't think it is possible to set the icon that is displayed in the notification when using the UDP protocol. The command line <code>growlnotify</code> allows you to set this. There is no reference to this in any of the UDP specs or examples that I have seen.
+	
+h2. License
+
+Copyright (C) 2010 Brenton Ashworth
+
+Distributed under the Eclipse Public License, the same as Clojure uses. See the file COPYING.
+
