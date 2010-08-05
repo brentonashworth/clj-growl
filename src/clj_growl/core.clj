@@ -123,10 +123,9 @@
              (reset! registered? true)))))
 
 ;;
-;; Send Growl notifictions via the command growlnotify
-;; This is an alternative way to sending notifications. Originally,
-;; this was my preferred way of doing it but I found that occationally
-;; messages would get lost.
+;; Send Growl notifictions via the command growlnotify.
+;; This is an alternative way of sending notifications. It is easier
+;; to use but not as reliable.
 ;;
 
 (defn- execute-command [command]
