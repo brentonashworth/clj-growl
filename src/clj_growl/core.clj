@@ -100,12 +100,27 @@
 
 (defn send-datagram
   "Send a datagram to Growl."
-  [host bytes]
-  (let [socket (DatagramSocket.)
-        address (InetAddress/getByName host)
-        packet (DatagramPacket. bytes (count bytes) address growl-udp-port)]
-    (.send socket packet)
-    (.close socket)))
+  ([bytes]
+     (send-datagram "localhost" bytes))
+  ([host bytes]
+     (let [socket (DatagramSocket.)
+           address (InetAddress/getByName host)
+           packet (DatagramPacket. bytes (count bytes) address growl-udp-port)]
+       (.send socket packet)
+       (.close socket))))
+
+(def registered? (atom false))
+
+(defn register-once
+  "Sends a registration message the first time it is called. All
+   subsequent calls do nothing."
+  ([app notifications]
+     (register-once nil app notifications))
+  ([pwd app notifications]
+     (or @registered?
+         (do (send-datagram
+              (registration-packet pwd app notifications))
+             (reset! registered? true)))))
 
 ;;
 ;; Send Growl notifictions via the command growlnotify
