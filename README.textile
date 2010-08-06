@@ -1,12 +1,14 @@
 h1. clj-growl
 
-Send "Growl":http://growl.info/ notifications from Clojure. Implements the GrowlTalk UDP protocol which is somewhat clearly described "here":http://growl.info/documentation/developer/protocol.php. I also used a "php implementation":http://the.taoofmac.com/space/projects/netgrowl.php as a reference. 
+Send "Growl":http://growl.info/ notifications from Clojure. Implements the GrowlTalk UDP protocol which is somewhat clearly described "here":http://growl.info/documentation/developer/protocol.php. I also used a "php implementation":http://the.taoofmac.com/space/projects/netgrowl.php as a reference.
+
+Version 0.2.0 of this library has been tested against Growl 1.2.1. 
 
 h2. Installation
 
 h3. Leiningen
 
-Add <code>[clj-growl "0.1.1"]</code> to your :dependencies in project.clj.
+Add <code>[clj-growl "0.2.0"]</code> to your :dependencies in project.clj.
 
 h3. Maven
 
@@ -17,7 +19,7 @@ Add the following dependency:
 <dependency>
   <groupId>clj-growl</groupId>
   <artifactId>clj-growl</artifactId>
-  <version>0.1.1</version>
+  <version>0.2.0</version>
 </dependency>
 </code>
 </pre>
@@ -33,35 +35,61 @@ which comes from Clojars...
 </code>
 </pre>
 
+h2. API
+
+The GrowlTalk protocol uses UDP so there is no way to get error messages when something goes wrong. Therefore, if it is not working for you, double-check everything and try again.
+
+h3. make-growler
+
+<pre><code>(make-growler [password application]
+	          [password application notifications-list])</code></pre>
+	                	
+Create a function for sending Growl notifications. Optionally register a new application.
+
+<code>password</code> A string which must match the one you enter in the Server Password field in the Growl control panel. If you did not enter a Server password then you may use nil or an empty string here.
+
+<code>application</code> The name of the application.
+
+<code>notifications-list</code> Optional list of the kinds of notifications that this application will receive. For each type, include the name of the notification and then a boolean to indicate if that notification is enabled by default. If this list is present then the application will be registered when you call make-growler. <b>You may only send notifications to the types included in this list</b>.
+
+h3. the growl function returned by make-growler, we will call it "growl"
+
+<pre><code>(growl [notification title message])</code></pre>
+
+<code>notification</code> a string that matches one of the configured notification types
+
+<code>title</code> The message title
+
+<code>message</code> The message	
+	
 h2. Usage
 
-Install Growl. Open the Growl control panel and select the network tab. Select "Listen for incoming notifications" and "Allow remote application registration". You may enter a Server Password or leave it empty.
-
-For the example below, my settings look like this:
-
-<img src="http://s3.amazonaws.com/formpluslogic-public/images/clj-growl/growl_settings.png" alt="Growl Settings"/>
-
-Version 0.1.1 of this library has been tested against Growl 1.2.1.
+# Install "Growl":http://growl.info/. 
+# Open the Growl control panel and select the Network tab. 
+# Select "Listen for incoming notifications" and "Allow remote application registration".
+# You may enter a Server Password or leave it empty.
+# Close the control panel.
 
 <pre>
 <code>
 (use 'clj-growl.core)
 
-(def registration (registration-packet "MyApp" ["Success" true "Failure" true]))
-(send-datagram registration)
-
-(def notification (notification-packet "MyApp" "Success" "Title" "Message"))
-(send-datagram notification)
+(def growl (make-growler "" "MyApp" ["Success" true "Failure" true]))
 </code>
 </pre>
 
-You must send a registration packet before you can send notifications. You may then only send notifications to a registered application and notification. 
+The <code>make-growler</code> function does two things. It registers the application named "MyApp" which configures two types of notifications: "Success" and "Failure" which are both enabled by default. Secondly, it returns a function that may be used to send notifications.
 
-Once you have sent the registration packet, you may open the Growl control panel and customize the appearance and behavior of each type of notification.
+After you have called <code>make-growler</code>, open the Growl control panel to see the application "MyApp" in the list of applications (If you left the control panel open while registering, the application will not appear until you close and re-open the panel). Use the control panel to customize the appearance and behavior of your configured notifications.
 
-When creating a registration packet, you pass a list of notifications. This list contains notification names followed by a boolean which indicates if the previous notification is enabled by default.
+To send notifications, use the growl function created above. 
 
-If you entered a Server Password then that password in the first argument to both <code>registration-packet</code> and <code>notification-packet</code>.
+<pre>
+<code>
+(growl "Success" "Hello World" "Clojure says Growl!")
+(growl "Failure" "Meltdown!" "Run for your life.")
+</code>
+</pre>
 
 h3. growlnotify
 
@@ -79,12 +107,6 @@ If you have the <code>growlnotify</code> command installed then you may also sen
 Even though this looks easier to use, I have found that it is not reliable. If your program is sending many notifications, they will not be consistently displayed.
 
 h2. Notes
-
-Since the UDP protocol is used, there are no error messages.
-
-If you have the Growl settings window open and are looking at the list of applications, when you send the registration packet, the application will not appear in the list. You have to close the settings window and then re-open it to see your application.
-
-If you have configured a password, you have to use the same password for sending the registration message and the notifications.
 
 The current implementation does not support flags. Flags allow you to set the priority of the notification as well as its stickyness.
 

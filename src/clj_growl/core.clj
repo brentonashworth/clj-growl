@@ -29,7 +29,9 @@
   [bytes password]
   (let [md (MessageDigest/getInstance "MD5")]
     (do (.update md bytes)
-        (if password (.update md (utf8 password))))
+        (if (and password
+                 (not (empty? password)))
+          (.update md (utf8 password))))
     (.digest md)))
 
 (defn registration-packet
@@ -109,18 +111,22 @@
        (.send socket packet)
        (.close socket))))
 
-(def registered? (atom false))
-
-(defn register-once
-  "Sends a registration message the first time it is called. All
-   subsequent calls do nothing."
-  ([app notifications]
-     (register-once nil app notifications))
+(defn make-growler
+  "Register this application and return a function that will create and send
+   growl notifications. Encapsulates the common use case."
+  ([pwd app]
+     (make-growler pwd app nil))
   ([pwd app notifications]
-     (or @registered?
-         (do (send-datagram
-              (registration-packet pwd app notifications))
-             (reset! registered? true)))))
+     (do (when notifications
+           (send-datagram
+            (registration-packet pwd app notifications)))
+         (fn [notification title message]
+           (send-datagram
+            (notification-packet pwd
+                                 app
+                                 notification
+                                 title
+                                 message))))))
 
 ;;
 ;; Send Growl notifictions via the command growlnotify.
