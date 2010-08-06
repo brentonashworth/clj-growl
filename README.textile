@@ -41,70 +41,47 @@ The GrowlTalk protocol uses UDP so there is no way to get error messages when so
 
 h3. make-growler
 
-<pre><code>(make-growler [password application]
-	          [password application notifications-list])</code></pre>
+<pre><code>(make-growler [password application])
+(make-growler [password application notifications-list])</code></pre>
 	                	
 Create a function for sending Growl notifications. Optionally register a new application.
 
-<code>password</code> A string which must match the one you enter in the Server Password field in the Growl control panel. If you did not enter a Server password then you may use nil or an empty string here.
+<code>password</code> A string which must match the one you enter in the "Server Password" field in the Growl control panel. If you did not enter a password then you may use nil or an empty string here.
 
 <code>application</code> The name of the application.
 
 <code>notifications-list</code> Optional list of the kinds of notifications that this application will receive. For each type, include the name of the notification and then a boolean to indicate if that notification is enabled by default. If this list is present then the application will be registered when you call make-growler. <b>You may only send notifications to the types included in this list</b>.
 
-h3. the growl function returned by make-growler, we will call it "growl"
+h3. the growl function returned by make-growler, which is here called "growl"
 
 <pre><code>(growl [notification title message])</code></pre>
 
-<code>notification</code> a string that matches one of the configured notification types
+<code>notification</code> A string that matches one of the configured notification types.
 
-<code>title</code> The message title
+<code>title</code> The message title.
 
-<code>message</code> The message	
+<code>message</code> The message text.	
 	
 h2. Usage
 
 # Install "Growl":http://growl.info/. 
-# Open the Growl control panel and select the Network tab. 
+# Open the Growl control panel and select the "Network" tab. 
 # Select "Listen for incoming notifications" and "Allow remote application registration".
-# You may enter a Server Password or leave it empty.
+# You may enter a "Server Password" or leave it empty.
 # Close the control panel.
 
-<pre>
-<code>
-(use 'clj-growl.core)
+<pre><code>(use 'clj-growl.core)
 
-(def growl (make-growler "" "MyApp" ["Success" true "Failure" true]))
-</code>
-</pre>
+(def growl (make-growler "" "MyApp" ["Success" true "Failure" true]))</code></pre>
 
-The <code>make-growler</code> function does two things. It registers the application named "MyApp" which configures two types of notifications: "Success" and "Failure" which are both enabled by default. Secondly, it returns a function that may be used to send notifications.
+The <code>make-growler</code> function registers the application named "MyApp" configuring two types of notifications, which are both enabled by default, and returns a function that may be used to send notifications.
 
 After you have called <code>make-growler</code>, open the Growl control panel to see the application "MyApp" in the list of applications (If you left the control panel open while registering, the application will not appear until you close and re-open the panel). Use the control panel to customize the appearance and behavior of your configured notifications.
 
 To send notifications, use the growl function created above. 
 
-<pre>
-<code>
-(growl "Success" "Hello World" "Clojure says Growl!")
-(growl "Failure" "Meltdown!" "Run for your life.")
-</code>
-</pre>
-
-h3. growlnotify
-
-If you have the <code>growlnotify</code> command installed then you may also send notifications using the <code>growlnotify</code> function.
-
-<pre>
-<code>
-(use 'clj-growl.core)
-
-(growlnotify "MyApp" "Title" "Message")
-(growlnotify "MyApp" {:type :sticky :image "some/image.png"} "Title" "Message")
-</code>
-</pre>
-
-Even though this looks easier to use, I have found that it is not reliable. If your program is sending many notifications, they will not be consistently displayed.
+<pre><code>(growl "Success" "Hello World" "Clojure says Growl!")
+(growl "Failure" "Meltdown!" "Run for your life.")</code></pre>
 
 h2. Notes
 
