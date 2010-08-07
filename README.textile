@@ -2,38 +2,30 @@ h1. clj-growl
 
 Send "Growl":http://growl.info/ notifications from Clojure. Implements the GrowlTalk UDP protocol which is somewhat clearly described "here":http://growl.info/documentation/developer/protocol.php. I also used a "php implementation":http://the.taoofmac.com/space/projects/netgrowl.php as a reference.
 
-Version 0.2.0 of this library has been tested against Growl 1.2.1. 
+Version 0.2.1 of this library has been tested against Growl 1.2.1. 
 
 h2. Installation
 
 h3. Leiningen
 
-Add <code>[clj-growl "0.2.0"]</code> to your :dependencies in project.clj.
+Add <code>[clj-growl "0.2.1"]</code> to your :dependencies in project.clj.
 
 h3. Maven
 
 Add the following dependency:
 
-<pre>
-<code>
-<dependency>
+<pre><code><dependency>
   <groupId>clj-growl</groupId>
   <artifactId>clj-growl</artifactId>
-  <version>0.2.0</version>
-</dependency>
-</code>
-</pre>
+  <version>0.2.1</version>
+</dependency></code></pre>
 
 which comes from Clojars...
 
-<pre>
-<code>
-<repository>
+<pre><code><repository>
   <id>clojars.org</id>
   <url>http://clojars.org/repo</url>
-</repository>
-</code>
-</pre>
+</repository></code></pre>
 
 h2. API
 

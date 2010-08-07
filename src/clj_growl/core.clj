@@ -34,6 +34,30 @@
           (.update md (utf8 password))))
     (.digest md)))
 
+(defn- defaults-seq [notifications]
+  (map last
+       (filter first
+               (map vector
+                    (map last notifications)
+                    (iterate inc 0)))))
+
+(defn- notifications-seq [notifications]
+  (map #(let [n (utf8 %)]
+          [(count n) n])
+       (map first notifications)))
+
+(defn- reg-buffer-size [application notifications defaults]
+  (apply +
+         6
+         (count application)
+         (count defaults)
+         (map #(+ 2 (first %)) notifications)))
+
+(defn- add-md5 [buff password]
+  (let [packet (seq (.array buff))]
+    (byte-array (concat packet
+                        (md5 (byte-array packet) password)))))
+
 (defn registration-packet
   "Create a Growl registration packet that can be sent with send-datagram.
    e.g. (registration-packet \"X\" [\"N1\" true \"N2\" true]) or
@@ -46,15 +70,11 @@
   ([password application notifications]
      (let [application (utf8 application)
            notifications (partition 2 notifications)
-           defaults (map last
-                         (filter first
-                                 (map vector
-                                      (map last notifications)
-                                      (iterate inc 0))))
-           notifications (map #(let [n (utf8 %)]
-                                 [(count n) n])
-                              (map first notifications))]
-       (let [buff (doto (ByteBuffer/allocate 100)
+           defaults (defaults-seq notifications)
+           notifications (notifications-seq notifications)]
+       (let [buff (doto (ByteBuffer/allocate (reg-buffer-size application
+                                                              notifications
+                                                              defaults))
                     (.put (byte growl-protocol-version))
                     (.put (byte growl-type-registration))
                     (.putShort (count application))
@@ -68,14 +88,16 @@
          (doseq [n defaults]
            (doto buff
              (.put (byte n))))
-         (let [p (.position buff)
-               packet (take p (seq (.array buff)))]
-           (byte-array (concat packet
-                               (md5 (byte-array packet) password))))))))
+         (add-md5 buff password)))))
+
+(defn- notif-buffer-size [& fields]
+  (apply +
+         12
+         (map count fields)))
 
 (defn notification-packet
   "Create a Growl notification packet that can be sent using send-datagram.
-   The current max buffer size if 5280. Flags are not implemented."
+   Flags are not implemented."
   ([app notif title message]
      (notification-packet nil app notif title message))
   ([pwd app notif title message]
@@ -83,7 +105,10 @@
            notif (utf8 notif)
            title (utf8 title)
            message (utf8 message)
-           buff (doto (ByteBuffer/allocate 5280)
+           buff (doto (ByteBuffer/allocate (notif-buffer-size notif
+                                                              title
+                                                              message
+                                                              app))
                   (.put (byte growl-protocol-version))
                   (.put (byte growl-type-notification))
                   (.putShort 0)
@@ -95,10 +120,7 @@
                   (.put title)
                   (.put message)
                   (.put app))]
-       (let [p (.position buff)
-             packet (take p (seq (.array buff)))]
-         (byte-array (concat packet
-                             (md5 (byte-array packet) pwd)))))))
+       (add-md5 buff pwd))))
 
 (defn send-datagram
   "Send a datagram to Growl."
